@@ -69,10 +69,11 @@ if __name__ == "__main__":
     KF = KalmanFilter(x,F,P,1,R,H)
     for i in range(10):
         KF.predict(dt)
-        KF.update(np.array([[i+1]]))
+        KF.update(np.array([[i+1 + np.random.randn()]]))
+        print("-"*10)
         print("New State:\n",KF.get_state(),"\n")
         print("System Var:\n", KF.get_P(),"\n")
-    
+        print()
     
     
     
