@@ -1,39 +1,50 @@
 
 clear;
+
+%Gets data from file
+fileID = fopen('Accel.txt');
+C = textscan(fileID,'%f');
+fclose(fileID);
+
+model_meas = cell2mat(C)';
+size = size(model_meas);
+num_of_meas = size(2);
+
+
 dt = 1.0; %Time Step
 
-x = [50;
+x = [0;
      0]; %State Matrix
-P = [500, 0; 
-     0, 500]; %State Estimate Covariance Matrix
+P = [.5, 0; 
+     0, .5]; %State Estimate Covariance Matrix
 F = [1, dt;
      0, 1 ]; %State Transistion Matrix
 
 u = []; %Control Inpts
 B = []; %Control Input Transistion Matrix
 
-Q = [0]; %Process Covariance Matrix
-R = [5]; %Measurement Covariance Matrix
+Q = [.00000000001, .0000000025; .000000025, .00005]; %Process Covariance Matrix
+R = [.38]; %Measurement Covariance Matrix
 
 H = [ 1, 0]; %Measuremnt Transistion Matrix
 z = []; %Measurement
 
-%Basic Test Model: 0 Proccess Variance, Init Pos = 0; Vel = 1 m/s
-model_meas = ones(1,100);
-for i = 1:100
-    model_meas(i) = i + ((rand()*2)-1)*sqrt(R);
-end
-
 kalman_pos = [];
 pred_pos=[];
 
+%Basic Test Model: 0 Proccess Variance, Init Pos = 0; Vel = 1 m/s
+%model_meas = ones(1,100);
+% for i = 1:100
+%    model_meas(i) = i + ((rand()*2)-1)*sqrt(R);
+% end
+
 %Runs the Kalman Filter
-for i = 1:100
+for i = 1:num_of_meas
     
     %---Kalman Filter------------------------------------------------------
     %Predict
     x_pred = F*x; %+ B*u;
-    P_pred = F*P*F'; %+ Q;
+    P_pred = F*P*F' + Q;
     
     pred_pos(i) = x_pred(1); 
     
@@ -54,5 +65,5 @@ for i = 1:100
     
 end;
 
-t = 1:100;
-plot(t, t, t, kalman_pos, 'r', t, pred_pos, 'y', t, model_meas, 'k');
+t = 1:num_of_meas;
+plot( t, kalman_pos, 'r', t, model_meas, 'k');
